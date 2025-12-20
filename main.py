@@ -42,20 +42,18 @@ def edit_flask_routes(new_code: str):
 
 @app.route('/api/tables')
 def list_tables():
-    """Liste toutes les tables Supabase"""
+    """Liste toutes les 19 tables Supabase"""
     try:
-        # Requête SQL pour récupérer les tables du schéma public
-        response = supabase.rpc('get_tables', {}).execute()
-        if response.data:
-            tables = response.data if isinstance(response.data, list) else [response.data]
-            return jsonify({"tables": tables, "count": len(tables), "status": "success"})
-        return jsonify({"tables": [], "count": 0, "status": "no_tables"})
-    except Exception as e:
-        # Essayer une approche alternative: énumérer les tables en les essayant
-        tables_found = []
-        common_tables = ['users', 'profiles', 'posts', 'comments', 'products', 'orders', 'categories', 'tags']
+        # Liste complète des 19 tables du schéma public
+        all_tables = [
+            'avis', 'catégories', 'confirmations_ventes', 'pays', 'coursiers',
+            'livraisons', 'commandements_historiques', 'historique_total', 'images_produits',
+            'molo_molo_payments', 'notifications', 'ordres', 'parraInages', 'produits',
+            'profils', 'régions', 'vendeurs', 'suivi_temps_réel', 'super_surveillance'
+        ]
         
-        for table_name in common_tables:
+        tables_found = []
+        for table_name in all_tables:
             try:
                 response = supabase.table(table_name).select('*', count='exact').limit(0).execute()
                 if response:
@@ -63,8 +61,8 @@ def list_tables():
             except:
                 pass
         
-        if tables_found:
-            return jsonify({"tables": tables_found, "count": len(tables_found), "status": "success", "note": "Tables détectées"})
+        return jsonify({"tables": tables_found, "count": len(tables_found), "status": "success"})
+    except Exception as e:
         return jsonify({"error": str(e), "tables": [], "count": 0, "status": "failed"}), 400
 
 @app.route('/')

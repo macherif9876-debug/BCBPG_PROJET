@@ -1775,6 +1775,18 @@ async function envoyer() {
 
 
 # ==============================================================================
+# ✅ FIX RENDER : Wrapper ASGI — rend Flask compatible avec Uvicorn
+# Flask est WSGI, Uvicorn est ASGI → asgiref fait le pont entre les deux
+# ==============================================================================
+try:
+    from asgiref.wsgi import WsgiToAsgi
+    asgi_app = WsgiToAsgi(app)
+    print("✅ [ASGI] Wrapper WsgiToAsgi activé — Flask compatible Uvicorn")
+except ImportError:
+    asgi_app = app
+    print("⚠️ [ASGI] asgiref non installé — utilise gunicorn à la place de uvicorn")
+
+# ==============================================================================
 # 🚀 DÉCLENCHEUR GITHUB & LANCEMENT DE L'APPLICATION
 # ==============================================================================
 

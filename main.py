@@ -36,7 +36,9 @@ from auth_inscription import inscription_bp, init_supabase
 import cloudinary
 import cloudinary.uploader
 from PIL import Image
-from rembg import remove
+
+# ✅ FIX RENDER : rembg / onnxruntime supprimés — trop lourds pour le free tier
+# La fonction designer_automatique_ia renvoie l'image originale sans traitement
 
 # --- IA LOURDE SUPPRIMÉE AU DÉMARRAGE ---
 MODE_IA_ACTIF = False
@@ -169,24 +171,15 @@ def upload_to_github(file_storage):
         return None
 
 # --- FONCTION IA (SUPPRESSION ARRIÈRE-PLAN) ---
+# ✅ FIX RENDER : rembg supprimé — retourne l'image originale sans modification
 def designer_automatique_ia(file_storage):
     try:
         file_storage.seek(0)
-        input_image = Image.open(file_storage)
-        output_image = remove(input_image)
-        background = Image.new("RGB", output_image.size, (255, 255, 255))
-        if output_image.mode == 'RGBA':
-            background.paste(output_image, mask=output_image.split()[3])
-        else:
-            background.paste(output_image)
-        img_byte_arr = io.BytesIO()
-        background.save(img_byte_arr, format='JPEG', quality=95)
-        img_byte_arr.seek(0)
-        return img_byte_arr
+        return file_storage
     except Exception as e:
         logging.error(f"Erreur Designer IA: {e}")
         file_storage.seek(0)
-        return file_storage 
+        return file_storage
 
 CATEGORIES_LIST = [
     "ÉLECTRONIQUE (TÉLÉPHONES, PC)", "HABITS POUR FEMMES", "HABITS POUR HOMMES",
@@ -1794,6 +1787,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"⚠️ Impossible d'exécuter la sauvegarde automatique : {e}")
 
-    # Lancement normal du serveur Flask de Replit
+    # Lancement normal du serveur Flask
     PORT = int(os.getenv("PORT", 3000))
     app.run(host='0.0.0.0', port=PORT, debug=True)
